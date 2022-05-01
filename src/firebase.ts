@@ -1,14 +1,20 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  onAuthStateChanged,
+  Unsubscribe,
+  User,
+  signOut,
+} from "firebase/auth";
 import {
   collection,
   doc,
   deleteDoc,
   getDocs,
   addDoc,
-  serverTimestamp,
 } from "firebase/firestore";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBTvkDecjLBR67HR3lLXK3KaFop9W4mxWY",
@@ -18,20 +24,36 @@ const firebaseConfig = {
   messagingSenderId: "1073205622730",
   appId: "1:1073205622730:web:e4e198f30f46bf92b40133",
 };
-
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth();
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in, see docs for a list of available properties
-    // https://firebase.google.com/docs/reference/js/firebase.User
-    const uid = user.uid;
-    console.log(`user is logged in: ${uid}}`);
-  }
-});
+export const logout = () => {
+  signOut(auth);
+};
+
+export const getUserState = () =>
+  new Promise((resolve, reject) => onAuthStateChanged(auth, resolve, reject));
+
+export const useAuthState = () => {
+  const user = ref<User>();
+  const error = ref<Error>();
+
+  let unsubscribe: Unsubscribe;
+  onMounted(() => {
+    unsubscribe = onAuthStateChanged(
+      auth,
+      (u) => (user.value = u || undefined),
+      (e) => (error.value = e)
+    );
+  });
+  onUnmounted(() => unsubscribe());
+
+  const isAuthenticated = computed(() => user.value != null);
+
+  return { user, error, isAuthenticated };
+};
 
 export const getMessagesOnce = async () => {
   try {
@@ -45,12 +67,18 @@ export const getMessagesOnce = async () => {
 export const saveMessage = async (message: string) => {
   try {
     const docRef = await addDoc(collection(db, "messages"), {
-      timestamp: serverTimestamp(),
+      timestamp: new Date().toISOString(),
       content: message,
     });
-    return `Message saved with ID: ${docRef.id}`;
+    return {
+      success: true,
+      msg: `Message saved with ID: ${docRef.id}`,
+    };
   } catch (e) {
-    return `Error adding message: ${e}`;
+    return {
+      success: false,
+      msg: `Error adding message: ${e}`,
+    };
   }
 };
 
