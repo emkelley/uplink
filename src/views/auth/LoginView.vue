@@ -25,7 +25,7 @@ const login = async () => {
 </script>
 
 <template>
-  <div class="container container-sm mx-auto h-screen py-12">
+  <div class="container container-sm mx-auto h-screen py-12 px-4">
     <div class="flex h-full justify-center items-center">
       <div class="w-96">
         <h1

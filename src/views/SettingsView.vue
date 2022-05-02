@@ -11,7 +11,7 @@ const navLinks: NavLink[] = [
 
 <template>
   <TheNavbar logo="Uplink" :links="navLinks" />
-  <div class="container container-sm mx-auto py-12">
+  <div class="container container-sm mx-auto py-12 px-4">
     <h1 class="text-3xl font-bold uppercase text-emerald-800">Settings</h1>
 
     <ContentBox> settings </ContentBox>
