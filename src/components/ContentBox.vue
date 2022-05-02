@@ -8,6 +8,6 @@
 
 <style lang="scss" scoped>
 .content-box {
-  @apply bg-white rounded p-6 mt-6 border-emerald-500 border;
+  @apply bg-white rounded p-6 mt-6 border-emerald-700 border;
 }
 </style>
